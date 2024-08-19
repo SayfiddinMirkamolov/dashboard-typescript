@@ -1,12 +1,12 @@
 import { createBrowserRouter } from "react-router-dom";
 import { paths } from "./paths";
 import { Spin } from "antd";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, ComponentType } from "react";
 
-const withSuspense = (cb) => {
+const withSuspense = <P extends {}>(cb: () => Promise<{ default: ComponentType<P> }>) => {
   const L = lazy(cb);
 
-  return (props) => (
+  return (props: P) => (
     <Suspense fallback={<Spin fullscreen />}>
       <L {...props} />
     </Suspense>

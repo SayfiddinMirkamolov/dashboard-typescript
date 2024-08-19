@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useUserStore } from "../../app/userStore";
 import { Button, Modal, Form, Input, notification } from "antd";
 
-// User interfeysi
 interface User {
   id: string;
   firstName: string;
@@ -17,7 +16,7 @@ const Users = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [fetchUsers]);
+  }, []);
 
   const handleAdd = () => {
     setEditingUser(null);
@@ -34,12 +33,12 @@ const Users = () => {
     notification.success({ message: "User deleted successfully" });
   };
 
-  const handleSave = (values: Omit<User, "id">) => {
+  const handleSave = (values: Partial<User>) => {
     if (editingUser) {
-      updateUser(editingUser.id, values);
+      updateUser(editingUser.id, { ...editingUser, ...values });
       notification.success({ message: "User updated successfully" });
     } else {
-      addUser(values);
+      addUser({ ...values, id: "" }); // Add default id handling
       notification.success({ message: "User added successfully" });
     }
     setIsModalVisible(false);
