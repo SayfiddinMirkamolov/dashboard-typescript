@@ -1,4 +1,4 @@
-import  { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useUserStore } from "../../app/userStore";
 import { Button, Modal, Form, Input, notification } from "antd";
 
@@ -10,7 +10,8 @@ interface User {
 }
 
 const Users = () => {
-  const { loading, users, error, fetchUsers, addUser, updateUser, deleteUser } = useUserStore();
+  const { loading, users, error, fetchUsers, addUser, updateUser, deleteUser } =
+    useUserStore();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
@@ -36,10 +37,10 @@ const Users = () => {
   const handleSave = async (values: User) => {
     try {
       if (editingUser) {
-        await updateUser({ ...values, id: editingUser.id });  // id ni saqlab qolish
+        await updateUser(editingUser.id, values); // updateUser ga to'g'ri argumentlarni yuboring
         notification.success({ message: "User updated successfully" });
       } else {
-        await addUser(values);  // addUser uchun id talab qilinmaydi
+        await addUser(values); // addUser uchun id talab qilinmaydi
         notification.success({ message: "User added successfully" });
       }
       setIsModalVisible(false);
@@ -50,7 +51,9 @@ const Users = () => {
 
   return (
     <div>
-      <Button type="primary" onClick={handleAdd}>Add User</Button>
+      <Button type="primary" onClick={handleAdd}>
+        Add User
+      </Button>
 
       {loading && <h2>Loading...</h2>}
       {error && <h2>{error}</h2>}
@@ -60,7 +63,9 @@ const Users = () => {
             <div key={user.id}>
               {i + 1}. {user.firstName} {user.lastName} - {user.email}
               <Button onClick={() => handleEdit(user)}>Edit</Button>
-              <Button danger onClick={() => handleDelete(user.id)}>Delete</Button>
+              <Button danger onClick={() => handleDelete(user.id)}>
+                Delete
+              </Button>
             </div>
           ))}
         </div>
@@ -72,11 +77,22 @@ const Users = () => {
         onCancel={() => setIsModalVisible(false)}
         footer={null}
       >
-        <Form onFinish={handleSave} initialValues={editingUser || { firstName: "", lastName: "", email: "" }}>
-          <Form.Item name="firstName" label="First Name" rules={[{ required: true }]}>
+        <Form
+          onFinish={handleSave}
+          initialValues={editingUser || { firstName: "", lastName: "", email: "" }}
+        >
+          <Form.Item
+            name="firstName"
+            label="First Name"
+            rules={[{ required: true }]}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="lastName" label="Last Name" rules={[{ required: true }]}>
+          <Form.Item
+            name="lastName"
+            label="Last Name"
+            rules={[{ required: true }]}
+          >
             <Input />
           </Form.Item>
           <Form.Item name="email" label="Email" rules={[{ required: true }]}>
