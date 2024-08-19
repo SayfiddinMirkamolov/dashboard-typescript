@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useUserStore } from "../../app/userStore";
 import { Button, Modal, Form, Input, notification } from "antd";
 
 interface User {
-  id: string;
+  id?: number;
   firstName: string;
   lastName: string;
   email: string;
@@ -11,12 +11,12 @@ interface User {
 
 const Users = () => {
   const { loading, users, error, fetchUsers, addUser, updateUser, deleteUser } = useUserStore();
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   const handleAdd = () => {
     setEditingUser(null);
@@ -28,17 +28,17 @@ const Users = () => {
     setIsModalVisible(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: number) => {
     deleteUser(id);
     notification.success({ message: "User deleted successfully" });
   };
 
-  const handleSave = (values: Partial<User>) => {
-    if (editingUser) {
-      updateUser(editingUser.id, { ...editingUser, ...values });
+  const handleSave = async (values: User) => {
+    if (editingUser?.id) {
+      await updateUser(editingUser.id, values);
       notification.success({ message: "User updated successfully" });
     } else {
-      addUser({ ...values, id: "" }); // Add default id handling
+      await addUser(values);
       notification.success({ message: "User added successfully" });
     }
     setIsModalVisible(false);
@@ -56,7 +56,7 @@ const Users = () => {
             <div key={user.id}>
               {i + 1}. {user.firstName} {user.lastName} - {user.email}
               <Button onClick={() => handleEdit(user)}>Edit</Button>
-              <Button danger onClick={() => handleDelete(user.id)}>Delete</Button>
+              <Button danger onClick={() => handleDelete(user.id!)}>Delete</Button>
             </div>
           ))}
         </div>

@@ -1,9 +1,9 @@
 import axios from "axios";
 import { create } from "zustand";
-import { notification } from 'antd';
+import { notification } from "antd";
 
 interface User {
-  id: string;
+  id: number;
   firstName: string;
   lastName: string;
   email: string;
@@ -15,8 +15,8 @@ interface UserStore {
   error: string;
   fetchUsers: () => Promise<void>;
   addUser: (user: User) => Promise<void>;
-  updateUser: (id: string, updatedUser: User) => Promise<void>;
-  deleteUser: (id: string) => Promise<void>;
+  updateUser: (id: number, updatedUser: User) => Promise<void>;
+  deleteUser: (id: number) => Promise<void>;
 }
 
 export const useUserStore = create<UserStore>((set) => ({
@@ -34,7 +34,7 @@ export const useUserStore = create<UserStore>((set) => ({
     }
   },
   
-  addUser: async (user) => {
+  addUser: async (user: User) => {
     try {
       const res = await axios.post("http://localhost:3000/users", user);
       set((state) => ({ users: [...state.users, res.data] }));
@@ -43,7 +43,7 @@ export const useUserStore = create<UserStore>((set) => ({
     }
   },
   
-  updateUser: async (id, updatedUser) => {
+  updateUser: async (id: number, updatedUser: User) => {
     try {
       await axios.put(`http://localhost:3000/users/${id}`, updatedUser);
       set((state) => ({
@@ -56,7 +56,7 @@ export const useUserStore = create<UserStore>((set) => ({
     }
   },
   
-  deleteUser: async (id) => {
+  deleteUser: async (id: number) => {
     try {
       await axios.delete(`http://localhost:3000/users/${id}`);
       set((state) => ({
