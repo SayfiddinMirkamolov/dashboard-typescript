@@ -23,26 +23,35 @@ export const useUserStore = create<UserStore>((set) => ({
   loading: false,
   users: [],
   error: "",
-  
+
   fetchUsers: async () => {
     set({ loading: true });
     try {
       const res = await axios.get("http://localhost:3000/users");
       set({ users: res.data, loading: false, error: "" });
-    } catch (err: any) {
-      set({ users: [], loading: false, error: err.message });
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        set({ users: [], loading: false, error: err.message });
+      } else {
+        set({ users: [], loading: false, error: "Unknown error occurred" });
+      }
     }
   },
-  
+
   addUser: async (user: User) => {
     try {
       const res = await axios.post("http://localhost:3000/users", user);
       set((state) => ({ users: [...state.users, res.data] }));
-    } catch (err: any) {
-      notification.error({ message: "Failed to add user" });
+      notification.success({ message: "User added successfully" });
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        notification.error({ message: `Failed to add user: ${err.message}` });
+      } else {
+        notification.error({ message: "Failed to add user: Unknown error" });
+      }
     }
   },
-  
+
   updateUser: async (id: number, updatedUser: User) => {
     try {
       await axios.put(`http://localhost:3000/users/${id}`, updatedUser);
@@ -51,19 +60,29 @@ export const useUserStore = create<UserStore>((set) => ({
           user.id === id ? { ...user, ...updatedUser } : user
         ),
       }));
-    } catch (err: any) {
-      notification.error({ message: "Failed to update user" });
+      notification.success({ message: "User updated successfully" });
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        notification.error({ message: `Failed to update user: ${err.message}` });
+      } else {
+        notification.error({ message: "Failed to update user: Unknown error" });
+      }
     }
   },
-  
+
   deleteUser: async (id: number) => {
     try {
       await axios.delete(`http://localhost:3000/users/${id}`);
       set((state) => ({
         users: state.users.filter((user) => user.id !== id),
       }));
-    } catch (err: any) {
-      notification.error({ message: "Failed to delete user" });
+      notification.success({ message: "User deleted successfully" });
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        notification.error({ message: `Failed to delete user: ${err.message}` });
+      } else {
+        notification.error({ message: "Failed to delete user: Unknown error" });
+      }
     }
   },
 }));

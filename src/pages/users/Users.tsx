@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { useUserStore } from "../../app/userStore";
 import { Button, Modal, Form, Input, notification } from "antd";
 
 interface User {
-  id?: number;
+  id: number;
   firstName: string;
   lastName: string;
   email: string;
@@ -34,14 +34,18 @@ const Users = () => {
   };
 
   const handleSave = async (values: User) => {
-    if (editingUser?.id) {
-      await updateUser(editingUser.id, values);
-      notification.success({ message: "User updated successfully" });
-    } else {
-      await addUser(values);
-      notification.success({ message: "User added successfully" });
+    try {
+      if (editingUser) {
+        await updateUser({ ...values, id: editingUser.id });  // id ni saqlab qolish
+        notification.success({ message: "User updated successfully" });
+      } else {
+        await addUser(values);  // addUser uchun id talab qilinmaydi
+        notification.success({ message: "User added successfully" });
+      }
+      setIsModalVisible(false);
+    } catch {
+      notification.error({ message: "Failed to save user" });
     }
-    setIsModalVisible(false);
   };
 
   return (
@@ -56,7 +60,7 @@ const Users = () => {
             <div key={user.id}>
               {i + 1}. {user.firstName} {user.lastName} - {user.email}
               <Button onClick={() => handleEdit(user)}>Edit</Button>
-              <Button danger onClick={() => handleDelete(user.id!)}>Delete</Button>
+              <Button danger onClick={() => handleDelete(user.id)}>Delete</Button>
             </div>
           ))}
         </div>
@@ -64,7 +68,7 @@ const Users = () => {
 
       <Modal
         title={editingUser ? "Edit User" : "Add User"}
-        visible={isModalVisible}
+        open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
       >
