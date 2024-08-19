@@ -2,31 +2,39 @@ import { useEffect, useState } from "react";
 import { useUserStore } from "../../app/userStore";
 import { Button, Modal, Form, Input, notification } from "antd";
 
+// User interfeysi
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 const Users = () => {
   const { loading, users, error, fetchUsers, addUser, updateUser, deleteUser } = useUserStore();
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   const handleAdd = () => {
     setEditingUser(null);
     setIsModalVisible(true);
   };
 
-  const handleEdit = (user) => {
+  const handleEdit = (user: User) => {
     setEditingUser(user);
     setIsModalVisible(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: string) => {
     deleteUser(id);
     notification.success({ message: "User deleted successfully" });
   };
 
-  const handleSave = (values) => {
+  const handleSave = (values: Omit<User, "id">) => {
     if (editingUser) {
       updateUser(editingUser.id, values);
       notification.success({ message: "User updated successfully" });

@@ -2,31 +2,37 @@ import { useEffect, useState } from "react";
 import { useProductStore } from "../../app/productStore";
 import { Button, Modal, Form, Input, InputNumber, notification } from "antd";
 
+interface Product {
+  id: string;
+  title: string;
+  price: number;
+}
+
 const Products = () => {
   const { loading, products, error, fetchProducts, addProduct, updateProduct, deleteProduct } = useProductStore();
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
+  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [fetchProducts]);
 
   const handleAdd = () => {
     setEditingProduct(null);
     setIsModalVisible(true);
   };
 
-  const handleEdit = (product) => {
+  const handleEdit = (product: Product) => {
     setEditingProduct(product);
     setIsModalVisible(true);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = (id: string) => {
     deleteProduct(id);
     notification.success({ message: "Product deleted successfully" });
   };
 
-  const handleSave = (values) => {
+  const handleSave = (values: { title: string; price: number }) => {
     if (editingProduct) {
       updateProduct(editingProduct.id, values);
       notification.success({ message: "Product updated successfully" });
@@ -45,7 +51,7 @@ const Products = () => {
       {error && <h2>{error}</h2>}
       {products.length > 0 && (
         <div>
-          {products.map((product, i) => (
+          {products.map((product: Product, i: number) => (
             <div key={product.id}>
               {i + 1}. {product.title} - ${product.price}
               <Button onClick={() => handleEdit(product)}>Edit</Button>
