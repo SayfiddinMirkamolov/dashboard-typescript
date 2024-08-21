@@ -155,6 +155,12 @@
       "username": "johndoe",
       "password": "john1234",
       "phone": "+998901234567"
+    },
+    {
+      "id": "7dcd",
+      "firstName": "tomy",
+      "lastName": "martins",
+      "email": "tomymartins@gmail.com"
     }
   ]
 }

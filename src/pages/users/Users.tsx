@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { useUserStore } from "../../app/userStore";
 import { Button, Modal, Form, Input, notification } from "antd";
+import { useUserStore } from "../../app/userStore";
 
 interface User {
   id: number;
@@ -10,8 +10,7 @@ interface User {
 }
 
 const Users = () => {
-  const { loading, users, error, fetchUsers, addUser, updateUser, deleteUser } =
-    useUserStore();
+  const { loading, filteredUsers, error, fetchUsers, addUser, updateUser, deleteUser, setSearchQuery, setSort, sortField, sortOrder } = useUserStore();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
 
@@ -34,13 +33,13 @@ const Users = () => {
     notification.success({ message: "User deleted successfully" });
   };
 
-  const handleSave = async (values: User) => {
+  const handleSave = async (values: Omit<User, "id">) => {
     try {
       if (editingUser) {
-        await updateUser(editingUser.id, values); // updateUser ga to'g'ri argumentlarni yuboring
+        await updateUser(editingUser.id, values);
         notification.success({ message: "User updated successfully" });
       } else {
-        await addUser(values); // addUser uchun id talab qilinmaydi
+        await addUser(values);
         notification.success({ message: "User added successfully" });
       }
       setIsModalVisible(false);
@@ -55,17 +54,31 @@ const Users = () => {
         Add User
       </Button>
 
+      <Input
+        placeholder="Search..."
+        onChange={(e) => setSearchQuery(e.target.value)}
+        style={{ width: 200, marginBottom: 20 }}
+      />
+
+      <Button onClick={() => setSort("firstName")}>
+        Sort by First Name {sortField === "firstName" && (sortOrder === "asc" ? "↑" : "↓")}
+      </Button>
+      <Button onClick={() => setSort("lastName")}>
+        Sort by Last Name {sortField === "lastName" && (sortOrder === "asc" ? "↑" : "↓")}
+      </Button>
+      <Button onClick={() => setSort("email")}>
+        Sort by Email {sortField === "email" && (sortOrder === "asc" ? "↑" : "↓")}
+      </Button>
+
       {loading && <h2>Loading...</h2>}
       {error && <h2>{error}</h2>}
-      {users.length > 0 && (
+      {filteredUsers.length > 0 && (
         <div>
-          {users.map((user, i) => (
+          {filteredUsers.map((user, i) => (
             <div key={user.id}>
               {i + 1}. {user.firstName} {user.lastName} - {user.email}
               <Button onClick={() => handleEdit(user)}>Edit</Button>
-              <Button danger onClick={() => handleDelete(user.id)}>
-                Delete
-              </Button>
+              <Button danger onClick={() => handleDelete(user.id)}>Delete</Button>
             </div>
           ))}
         </div>
@@ -81,18 +94,10 @@ const Users = () => {
           onFinish={handleSave}
           initialValues={editingUser || { firstName: "", lastName: "", email: "" }}
         >
-          <Form.Item
-            name="firstName"
-            label="First Name"
-            rules={[{ required: true }]}
-          >
+          <Form.Item name="firstName" label="First Name" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item
-            name="lastName"
-            label="Last Name"
-            rules={[{ required: true }]}
-          >
+          <Form.Item name="lastName" label="Last Name" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
           <Form.Item name="email" label="Email" rules={[{ required: true }]}>

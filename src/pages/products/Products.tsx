@@ -1,16 +1,29 @@
 import { useEffect, useState } from "react";
-import { useProductStore } from "../../app/productStore";
 import { Button, Modal, Form, Input, InputNumber, notification } from "antd";
+import { useProductStore } from "../../app/productStore";
 
 interface Product {
   id: string;
   title: string;
   price: number;
+  description: string;
 }
 
 const Products = () => {
-  const { loading, products, fetchProducts, addProduct, updateProduct, deleteProduct } = useProductStore();
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
+  const {
+    loading,
+    filteredProducts,
+    error,
+    fetchProducts,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+    setSearchQuery,
+    setSort,
+    sortField,
+    sortOrder,
+  } = useProductStore();
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
   useEffect(() => {
@@ -36,7 +49,7 @@ const Products = () => {
     }
   };
 
-  const handleSave = async (values: { title: string; price: number }) => {
+  const handleSave = async (values: Omit<Product, "id">) => {
     try {
       if (editingProduct) {
         await updateProduct(editingProduct.id, values);
@@ -53,14 +66,30 @@ const Products = () => {
 
   return (
     <div>
-      <Button type="primary" onClick={handleAdd}>Add Product</Button>
+      <Button type="primary" onClick={handleAdd}>
+        Add Product
+      </Button>
+
+      <Input
+        placeholder="Search..."
+        onChange={(e) => setSearchQuery(e.target.value)}
+        style={{ width: 200, marginBottom: 20 }}
+      />
+
+      <Button onClick={() => setSort("title")}>
+        Sort by Title {sortField === "title" && (sortOrder === "asc" ? "↑" : "↓")}
+      </Button>
+      <Button onClick={() => setSort("price")}>
+        Sort by Price {sortField === "price" && (sortOrder === "asc" ? "↑" : "↓")}
+      </Button>
 
       {loading && <h2>Loading...</h2>}
-      {products.length > 0 && (
+      {error && <h2>{error}</h2>}
+      {filteredProducts.length > 0 && (
         <div>
-          {products.map((product: Product, i: number) => (
+          {filteredProducts.map((product) => (
             <div key={product.id}>
-              {i + 1}. {product.title} - ${product.price}
+              {product.title} - ${product.price}
               <Button onClick={() => handleEdit(product)}>Edit</Button>
               <Button danger onClick={() => handleDelete(product.id)}>Delete</Button>
             </div>
@@ -74,12 +103,18 @@ const Products = () => {
         onCancel={() => setIsModalVisible(false)}
         footer={null}
       >
-        <Form onFinish={handleSave} initialValues={editingProduct || { title: "", price: 0 }}>
+        <Form
+          onFinish={handleSave}
+          initialValues={editingProduct || { title: "", price: 0, description: "" }}
+        >
           <Form.Item name="title" label="Title" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="price" label="Price" rules={[{ required: true }]}>
+          <Form.Item name="price" label="Price" rules={[{ required: true, type: "number", min: 0 }]}>
             <InputNumber style={{ width: "100%" }} />
+          </Form.Item>
+          <Form.Item name="description" label="Description">
+            <Input.TextArea />
           </Form.Item>
           <Button type="primary" htmlType="submit">
             {editingProduct ? "Update" : "Add"}
